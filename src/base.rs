@@ -1038,10 +1038,14 @@ impl RoomInfo {
     pub fn unreads(&self, settings: &ApplicationSettings) -> UnreadInfo {
         let last_message = self.messages.last_key_value();
         let last_receipt = self.get_receipt(&settings.profile.user_id);
+        let last_read_message = last_receipt.map(|last_read| self.get_event(&last_read)).flatten();
 
-        match (last_message, last_receipt) {
+        match (last_message, last_read_message) {
             (Some(((ts, recent), _)), Some(last_read)) => {
-                UnreadInfo { unread: last_read != recent, latest: Some(*ts) }
+                UnreadInfo {
+                    unread: last_read.event.event_id() != recent,
+                    latest: Some(*ts),
+                }
             },
             (Some(((ts, _), _)), None) => UnreadInfo { unread: false, latest: Some(*ts) },
             (None, _) => UnreadInfo::default(),
