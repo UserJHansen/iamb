@@ -139,7 +139,7 @@ async fn global_or_room_mode(
         Ok(true) => IsOneToOne::Yes,
         _ => IsOneToOne::No,
     };
-    let is_encrypted = match room.is_encrypted().await {
+    let is_encrypted = match room.latest_encryption_state().await.map(|e| e.is_encrypted()) {
         Ok(true) => IsEncrypted::Yes,
         _ => IsEncrypted::No,
     };
